@@ -29,8 +29,9 @@ public class RCC_PhotonUIRoom : MonoBehaviour {
     public void JoinRoom() {
 
         RCC_PhotonManager.Instance.JoinSelectedRoom(this);
-
     }
+
+    
 
 }
 #endif

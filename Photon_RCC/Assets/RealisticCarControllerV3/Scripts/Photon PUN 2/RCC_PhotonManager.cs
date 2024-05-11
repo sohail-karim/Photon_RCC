@@ -31,6 +31,7 @@ public class RCC_PhotonManager : MonoBehaviourPunCallbacks {
     public GameObject noRoomsYet;
     public GameObject createRoomButton;
     public GameObject exitRoomButton;
+    public GameObject Match_Options;   // my
 
     [Header("UI Texts")]
     public Text status;
@@ -98,6 +99,7 @@ public class RCC_PhotonManager : MonoBehaviourPunCallbacks {
             ConnectToServer();
         else
             nickPanel.gameObject.SetActive(false);
+        Match_Options.gameObject.SetActive(true);  //my
 
     }
 
@@ -266,6 +268,18 @@ public class RCC_PhotonManager : MonoBehaviourPunCallbacks {
         PhotonNetwork.JoinRoom(room.roomName.text);
 
     }
+
+    //my
+    public void QuickMatch()
+    {
+        PhotonNetwork.JoinRandomRoom();
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        CreateRoom();
+    }
+
 
     public void Chat(InputField inputField) {
 
