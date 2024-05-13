@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
+using TMPro;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
@@ -22,7 +23,20 @@ public class Launcher : MonoBehaviourPunCallbacks
     #region Public Fields
     [Tooltip("The Ui Panel to let the user enter name, connect and play")]
     [SerializeField]
+    private GameObject Browse_Room_Panels;
+
+    [Tooltip("The Ui Panel to let the user enter name, connect and play")]
+    [SerializeField]
+    private GameObject Create_Room_Panel;
+    [Tooltip("The Ui Panel to let the user enter name, connect and play")]
+    [SerializeField]
+    public  GameObject browse_Players_Panel;
+    [Tooltip("The Ui Panel to let the user enter name, connect and play")]
+    [SerializeField]
     private GameObject controlPanel;
+    [Tooltip("RoomName to be created!")]
+    [SerializeField]
+    private TMP_InputField _roomName;
     [SerializeField]
     private GameObject Modes_panel;
     [Tooltip("The UI Label to inform the user that the connection is in progress")]
@@ -53,6 +67,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         // #Critical
         // this makes sure we can use PhotonNetwork.LoadLevel() on the master client and all clients in the same room sync their level automatically
         PhotonNetwork.AutomaticallySyncScene = true;
+      
     }
 
     /// <summary>
@@ -83,7 +98,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         {
             // #Critical we need at this point to attempt joining a Random Room. If it fails, we'll get notified in OnJoinRandomFailed() and we'll create one.
             Modes_panel.SetActive(true );
-            controlPanel.SetActive(false);
+            
             //my    PhotonNetwork.JoinRandomRoom();
         }
         else
@@ -97,6 +112,20 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     #endregion
 
+    
+    public void OnClick_CreateRoom()
+    {
+        string name = _roomName.text;
+        PhotonNetwork.CreateRoom(name, new RoomOptions());
+    }
+
+    public void onClick_JoinRandomRoom()
+    {
+        if (PhotonNetwork.IsConnected || isConnecting == false)
+        {
+            PhotonNetwork.JoinRandomRoom();
+        }
+    }
 
     #region MonoBehaviourPunCallbacks Callbacks
 
@@ -109,15 +138,16 @@ public class Launcher : MonoBehaviourPunCallbacks
             PhotonNetwork.JoinLobby();
             isConnecting=false;
             Modes_panel.SetActive(true);
+            controlPanel.SetActive(false);
         }
     }
 
-    public void onClick_JoinRandomRoom()
+   
+    public override void OnCreatedRoom()
     {
-        if(PhotonNetwork.IsConnected || isConnecting == false)
-        {
-            PhotonNetwork.JoinRandomRoom();
-        }
+        Debug.Log("Room Created Succesfully");
+        Create_Room_Panel.SetActive(false);
+        browse_Players_Panel.SetActive(true);
         
     }
 
@@ -142,14 +172,15 @@ public class Launcher : MonoBehaviourPunCallbacks
         // #Critical: We only load if we are the first player, else we rely on `PhotonNetwork.AutomaticallySyncScene` to sync our instance scene.
         if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
         {
-            Debug.Log("We load the 'Room for 1' " );
+            Debug.Log("Entered Room....." );
 
             // #Critical
             // Load the Room Level.
       //      PhotonNetwork.LoadLevel("Room for 1");
-          controlPanel.SetActive(false );
-
+             controlPanel.SetActive(false );  
         }
+        browse_Players_Panel.SetActive(true );
+        Browse_Room_Panels.SetActive(false);
     }
 
     #endregion
