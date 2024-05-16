@@ -19,18 +19,24 @@ public class PlayerListingMenu : MonoBehaviourPunCallbacks
     {
         GetCurrentRoomPlayers();
     }
+    public override void OnLeftRoom()
+    {
+        _content.DestroyChildren();
+    }
     private void GetCurrentRoomPlayers()
     {
         if (PhotonNetwork.InRoom)
         {
+            if (!PhotonNetwork.IsConnected)
+                return;
+            if (PhotonNetwork.CurrentRoom == null || PhotonNetwork.CurrentRoom.Players == null)
+                return;
             Debug.Log("Players : " + PhotonNetwork.CurrentRoom.Players);
             foreach (KeyValuePair<int, Player> playerinfo in PhotonNetwork.CurrentRoom.Players)
             {
                 AddPlayerListing(playerinfo.Value);
             }
         }
-        
-
     }
     private void AddPlayerListing(Player player)
     {
@@ -55,6 +61,12 @@ public class PlayerListingMenu : MonoBehaviourPunCallbacks
             Destroy(_listings[index].gameObject);
             _listings.RemoveAt(index);
         }
+    }
+
+    public void OnClick_StartGame()
+    {
+        if(PhotonNetwork.IsMasterClient)
+            PhotonNetwork.LoadLevel(1);
     }
    
 }

@@ -7,6 +7,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using TMPro;
+using UnityEditor.XR;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
@@ -17,6 +18,10 @@ public class Launcher : MonoBehaviourPunCallbacks
     [SerializeField]
     private byte maxPlayersPerRoom = 4;
 
+
+    //for setting passwords
+
+    private ExitGames.Client.Photon.Hashtable _myCustomProperties = new ExitGames.Client.Photon.Hashtable();
     #region Private Serializable Fields
 
     #endregion
@@ -37,6 +42,8 @@ public class Launcher : MonoBehaviourPunCallbacks
     [Tooltip("RoomName to be created!")]
     [SerializeField]
     private TMP_InputField _roomName;
+    [SerializeField]
+    private TMP_InputField _roomPassword;
     [SerializeField]
     private GameObject Modes_panel;
     [Tooltip("The UI Label to inform the user that the connection is in progress")]
@@ -75,6 +82,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     /// </summary>
     void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
         controlPanel.SetActive(true);
         Modes_panel.SetActive(false);    
     }
@@ -116,15 +124,45 @@ public class Launcher : MonoBehaviourPunCallbacks
     public void OnClick_CreateRoom()
     {
         string name = _roomName.text;
-        PhotonNetwork.CreateRoom(name, new RoomOptions());
+        //Starting Code from here for testing
+        if (_roomPassword.text != "")
+        {
+            Debug.Log("creating room with password!!!");
+            PhotonNetwork.CreateRoom(name, new RoomOptions(){CustomRoomPropertiesForLobby = new string[]{"Password"},CustomRoomProperties = new ExitGames.Client.Photon.Hashtable()
+        {
+      { "Password", _roomPassword.text }
+   }
+            });
+        }
+        else
+        {
+            Debug.Log("creating room without password!!!");
+            PhotonNetwork.CreateRoom(name);
+        }
+
+        //testing ending above code
+ //     _myCustomProperties.Add("secret",_roomPassword.text);
+ //     RoomOptions roomOptions = new RoomOptions();
+ //     
+ //     roomOptions.CustomRoomProperties = _myCustomProperties;
+        
+    //    roomOptions.CustomRoomPropertiesForLobby =   new string[] { "secret" };
+
+       
+
+  //      PhotonNetwork.CreateRoom(name,roomOptions);
+    //    _myCustomProperties.Remove("secret");
     }
 
     public void onClick_JoinRandomRoom()
     {
         if (PhotonNetwork.IsConnected || isConnecting == false)
         {
-            PhotonNetwork.JoinRandomRoom();
+            // this function is used to connect to a room based on criteria.....
+            _myCustomProperties.Add("Password", "");
+           PhotonNetwork.JoinRandomOrCreateRoom(_myCustomProperties); 
         }
+            
     }
 
     #region MonoBehaviourPunCallbacks Callbacks
@@ -134,8 +172,9 @@ public class Launcher : MonoBehaviourPunCallbacks
         Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
         if(isConnecting)
         {
+            if(!PhotonNetwork.InLobby)
+                PhotonNetwork.JoinLobby();
             //   PhotonNetwork.JoinRandomRoom();
-            PhotonNetwork.JoinLobby();
             isConnecting=false;
             Modes_panel.SetActive(true);
             controlPanel.SetActive(false);
@@ -145,6 +184,7 @@ public class Launcher : MonoBehaviourPunCallbacks
    
     public override void OnCreatedRoom()
     {
+        
         Debug.Log("Room Created Succesfully");
         Create_Room_Panel.SetActive(false);
         browse_Players_Panel.SetActive(true);
@@ -153,7 +193,6 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-       
         controlPanel.SetActive(true);
         Debug.LogWarningFormat("PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {0}", cause);
     }
@@ -168,19 +207,19 @@ public class Launcher : MonoBehaviourPunCallbacks
     
     public override void OnJoinedRoom()
     {
+
         Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
         // #Critical: We only load if we are the first player, else we rely on `PhotonNetwork.AutomaticallySyncScene` to sync our instance scene.
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-        {
+       
             Debug.Log("Entered Room....." );
-
             // #Critical
             // Load the Room Level.
       //      PhotonNetwork.LoadLevel("Room for 1");
-             controlPanel.SetActive(false );  
-        }
+        controlPanel.SetActive(false );  
         browse_Players_Panel.SetActive(true );
         Browse_Room_Panels.SetActive(false);
+        Modes_panel.SetActive(false);
+
     }
 
     #endregion

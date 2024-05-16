@@ -20,6 +20,9 @@ EditorBuildSettings:
       (Photon PUN2).unity
     guid: e8062292ace033f419d3db2f3f34a92e
   - enabled: 1
-    path: Assets/Scenes/Menu_MY_RCC_Photon.unity
+    path: Assets/Scenes/MY_RCC_Photon_Scene/Menu_MY_RCC_Photon.unity
     guid: 6e61729b2333c7741814fccc2fc968f7
+  - enabled: 1
+    path: Assets/Scenes/MY_RCC_Photon_Scene/Game.unity
+    guid: 031c322178f9d854fa939a4b2aa5c497
   m_configObjects: {}
