@@ -7,7 +7,6 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using TMPro;
-using UnityEditor.XR;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
@@ -29,7 +28,12 @@ public class Launcher : MonoBehaviourPunCallbacks
     [Tooltip("The Ui Panel to let the user enter name, connect and play")]
     [SerializeField]
     private GameObject Browse_Room_Panels;
-
+    [Tooltip("The Ui Panel to let the user enter name, connect and play")]
+    [SerializeField]
+    private GameObject Private_Rooms_Panel;
+    [Tooltip("The Ui Panel to let the user enter name, connect and play")]
+    [SerializeField]
+    private GameObject Public_Rooms_Panel;
     [Tooltip("The Ui Panel to let the user enter name, connect and play")]
     [SerializeField]
     private GameObject Create_Room_Panel;
@@ -71,6 +75,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     /// </summary>
     void Awake()
     {
+        database.roomslist.Clear();
         // #Critical
         // this makes sure we can use PhotonNetwork.LoadLevel() on the master client and all clients in the same room sync their level automatically
         PhotonNetwork.AutomaticallySyncScene = true;
@@ -86,7 +91,6 @@ public class Launcher : MonoBehaviourPunCallbacks
         controlPanel.SetActive(true);
         Modes_panel.SetActive(false);    
     }
-
     #endregion
 
 
@@ -128,7 +132,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         if (_roomPassword.text != "")
         {
             Debug.Log("creating room with password!!!");
-            PhotonNetwork.CreateRoom(name, new RoomOptions(){CustomRoomPropertiesForLobby = new string[]{"Password"},CustomRoomProperties = new ExitGames.Client.Photon.Hashtable()
+            PhotonNetwork.CreateRoom(name, new RoomOptions(){CustomRoomPropertiesForLobby = new string[]{ "Password" },CustomRoomProperties = new ExitGames.Client.Photon.Hashtable()
         {
       { "Password", _roomPassword.text }
    }
@@ -136,8 +140,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.Log("creating room without password!!!");
-            PhotonNetwork.CreateRoom(name);
+           PhotonNetwork.CreateRoom(name);
         }
 
         //testing ending above code
@@ -159,7 +162,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsConnected || isConnecting == false)
         {
             // this function is used to connect to a room based on criteria.....
-            _myCustomProperties.Add("Password", "");
+            _myCustomProperties.Add("Password", null);
            PhotonNetwork.JoinRandomOrCreateRoom(_myCustomProperties); 
         }
             
@@ -184,11 +187,11 @@ public class Launcher : MonoBehaviourPunCallbacks
    
     public override void OnCreatedRoom()
     {
-        
         Debug.Log("Room Created Succesfully");
         Create_Room_Panel.SetActive(false);
-        browse_Players_Panel.SetActive(true);
-        
+        Private_Rooms_Panel.SetActive(false);
+        Public_Rooms_Panel.SetActive(false);
+        browse_Players_Panel.SetActive(true);   
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -215,7 +218,10 @@ public class Launcher : MonoBehaviourPunCallbacks
             // #Critical
             // Load the Room Level.
       //      PhotonNetwork.LoadLevel("Room for 1");
+
         controlPanel.SetActive(false );  
+        Private_Rooms_Panel.SetActive(false);
+        Public_Rooms_Panel.SetActive(false) ; 
         browse_Players_Panel.SetActive(true );
         Browse_Room_Panels.SetActive(false);
         Modes_panel.SetActive(false);
